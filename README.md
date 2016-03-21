@@ -3,7 +3,7 @@ This is a basic python module and scripts for working with sqlite3 bug tracking 
 
 It includes scripts for basic tasks, and a module with a basic API for anyone who is interested in building a larger application. 
 
-It has not been tested with any teams larger than one (myself). Larger teams or teams should probably consider a more feature rich tool set, although everyone is free to, and encouraged to try to use this as a starting point for any larger applications, but please do not blame me if it turns out not to work.
+It has not been tested with any teams larger than one (myself). Larger teams or teams with trust issues should probably consider a more feature rich tool set, although everyone is free to, and encouraged to try to use this as a starting point for any larger applications, but please do not blame me if it turns out not to work.
 
 Any feedback is greatly appreciated.
 
