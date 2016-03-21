@@ -37,9 +37,12 @@ class BugDB:
         self.cxn.row_factory=sqlite3.Row
         self.filename=filename
 
-    def bugs(self,active_only=True):
+    def bugs(self,active_only=True,name_only=False):
         """Return all bug information, in form of a list of dictionaries. 
-If active_only is is set to False, return a list of all previous bugs"""
+If active_only is is set to False, return a list of all previous bugs
+if name_only is True, only return bug names
+"""
+
         q="SELECT {},{},{},{},{},{},{} FROM {} ".format(
             BugDB.NAME_COLUMN,
             BugDB.STEPS_COLUMN,
@@ -63,10 +66,13 @@ If active_only is is set to False, return a list of all previous bugs"""
             cur=self.cxn.cursor()
             for row in cur.execute(q,params):                
                 name=row["bug_name"]
-                bug={}
-                for k in row.keys():
-                    bug[k]=row[k]
-                yield bug
+                if name_only:
+                    yield name
+                else:
+                    bug={}
+                    for k in row.keys():
+                        bug[k]=row[k]
+                    yield bug
 
     def list_bugs(self,active_only=True):
         """list all active bugs, or all bugs if active_only is set  to False"""
@@ -95,16 +101,17 @@ If active_only is is set to False, return a list of all previous bugs"""
         multilines=[BugDB.STEPS_COLUMN,BugDB.XB_COLUMN,BugDB.OB_COLUMN]
         existing_bugs=[ b[BugDB.NAME_COLUMN] for b in self.bugs(active_only=False)]
         for column_name in BugDB.BUG_COLUMN_LIST:            
-            try:
+            if column_name in kwargs:                
                 params[column_name]=kwargs[column_name]
-            except KeyError:
+
+            if not params[column_name]:
                 if not force:
                     if column_name in multilines:
                         params[column_name]=multiline_input("Enter value for {}".format(column_name))
                     else:
                         if column_name==BugDB.NAME_COLUMN:
                             params[column_name]=input("Enter value for {}:> ".format(column_name))
-                            while params[column_name] in existing_bugs:
+                            while params[column_name] not in existing_bugs:
                                 print("KABLAMMO! That name is chosen already")
                                 params[column_name]=input("Enter value for {}:> ".format(column_name))
 
@@ -205,7 +212,7 @@ If active_only is is set to False, return a list of all previous bugs"""
         if "bug_id" in kwargs:
             params["rowid"]=kwargs["bug_id"]
         elif self.NAME_COLUMN in kwargs:
-            params[self.NAME_COLUMN]=kwargs["name"]
+            params[self.NAME_COLUMN]=kwargs["bug_name"]
         else:
             raise FattyException("You must supply either a bug_id or a bug_name as a keyword argument. Not provided in kwargs: "+str(kwargs))
 
@@ -224,8 +231,12 @@ If active_only is is set to False, return a list of all previous bugs"""
         with self.cxn:
             cur=self.cxn.cursor()
             cur.execute(q,params)
-            row=cur.fetchone()
-            return row
+            try:
+                row=cur.fetchone()
+                return row
+            except TypeError:
+                raise FattyException("No bug found with the given parameters: ",params)
+
     def reassign(self,assign_to,**kwargs):
         """Reassign the bug of the given name or bug_id to the `assigned_to`
 """
@@ -293,12 +304,12 @@ def write_config(configs,configfile=None):
     """Write a config file. using the default $HOME/.fattybugs filename if none is present"""
 
     if not configfile:
-        configfile=_default_configfile()
+        configfile=default_configfile()
 
     with open(configfile,"w") as cfh:
         configs.write(cfh)
 
-def _default_configfile():
+def default_configfile():
     """return the default config filename, which is either $HOME/.fattybugs, or $USERPROFILE/.fattybugs
 
 raises FattyException if no 
@@ -317,15 +328,23 @@ raises FattyException if no
 def default_configs():
     """Return the default configparser object"""
     configs=configparser.ConfigParser()
-    configs.read(_default_configfile())
+    configs.read(default_configfile())
     
     return configs
                               
     
-def default_bug_db():
-    """return the filename of the default bug database, this is based on relative directories"""
+def default_bug_db(configfile=None):
+    """return the filename of the default bug database, as specified in configs["bug_db"]["db_file"]
+    
+if no configfile is specified, the default is either $HOME/.fattybugs or $USERPROFILE/.fattybugs
+"""
 
-    configs=default_configs()
+    configs=None
+    if not configfile:
+        configs=default_configs()
+    else:
+        configs=configparser.ConfigParser()
+        configs.read(configfile)
 
     db_file=os.path.normpath(configs.get("bug_db","db_file"))
     return db_file
