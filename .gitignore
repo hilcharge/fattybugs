@@ -4,10 +4,11 @@
 
 /*.egg-info
 /*.egg
+*.egg-info
 
 *~
 *#
 *.backup
 *.done
 
-.jjfattypy
+venv
