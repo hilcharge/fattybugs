@@ -107,13 +107,15 @@ if name_only is True, only return bug names
             if not params[column_name]:
                 if not force:
                     if column_name in multilines:
-                        params[column_name]=multiline_input("Enter value for {}".format(column_name))
+                        params[column_name]=multiline_input("Enter value for {}".format(column_name.replace("_"," ")))
                     else:
+                        params[column_name]=input("Enter value for {}:> ".format(column_name.replace("_"," ")))
                         if column_name==BugDB.NAME_COLUMN:
-                            params[column_name]=input("Enter value for {}:> ".format(column_name))
-                            while params[column_name] not in existing_bugs:
+              
+                            while params[column_name] in existing_bugs:
                                 print("KABLAMMO! That name is chosen already")
                                 params[column_name]=input("Enter value for {}:> ".format(column_name))
+                            params[column_name]=column_name.replace(" ","-").lower()
 
         if not len(params):
             logging.error("No data given about bug, not inserting it")
@@ -358,7 +360,7 @@ def multiline_input(prompt):
     """Prompt for multiline input"""
 
     lines=[]
-    print(prompt+" : (input will end after entering a blank line)")
+    print(prompt+" (input will end after entering a blank line) : >")
     while True:
         line=input()
         if not line.strip():
