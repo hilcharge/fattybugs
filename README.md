@@ -11,7 +11,7 @@ Any feedback is greatly appreciated.
 Install
 --------
 
-    $ git clone https://github.com/hilcharge/fattybugs
+    $ git clone https://github.com/hilcharge/fattybugs.git
     $ cd fattybugs
     $ python setup.py install
 
@@ -98,7 +98,7 @@ Module usage
 
 ### Make a bug database ###
    
-    > from fattybugs import fattybugs
+    > import fattybugs
     > db_file="/path/to/shared/bug_db.db
     > bdb=fattybugs.build_db(db_file,write_config=True)
     # Setting write_config=True will cause a ".fattybugs" file to bewritten in your $HOME directory
