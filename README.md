@@ -114,13 +114,20 @@ If you have some different bug database, you can use the following sequence:
 
     > bugdb=fattybugs.BugDB(DB_FILENAME)
 
-DB_FILENAME can be retrieved from your configuration file if you wish:
+DB_FILENAME can be retrieved from the default configuration file (`$HOME/.fattybugs` or `$USERPROFILE/.fattybugs`):
+
     > DB_FILENAME=fattybugs.default_bug_db()
 
 You can use a different configuration file too:
+
     > DB_FILENAME=fattybugs.default_bug_db("other_config_file")
     ## Each config file needs only a "bug_db" section with a "db_file" option in it specifying the path
 
+### Get all the active bugs ###
+    
+    > bugdb.bugs()
+    [ { <BUG_ONE_DATA>},
+      { ... } ]
 
 ### List all the unfixed bugs ###
 
